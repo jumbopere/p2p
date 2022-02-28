@@ -93,6 +93,7 @@ try {
           error: 'activate account',
         });
       }
+     
 
       res.status(200).json({
         _id: user._id,
@@ -110,3 +111,75 @@ catch(err) {
     return res.status(500).send({ error: "Something went wrong"})
 }
 }
+
+
+export const deleteUser =async (req, res)=> {
+ try {
+    const user = await User.findById(req.params.id);
+    if (user) {
+      if (user.isAdmin === true) {
+        res.status(400).send({ message: 'Can Not Delete Admin User' });
+        return;
+      }
+      const deleteUser = await user.remove();
+      res.send({ message: 'User Deleted', user: deleteUser });
+    } else {
+      res.status(404).send({ message: 'User Not Found' });
+    }
+
+ }
+ catch(err) {
+    console.log(err)
+    return res.status(500).send({ error: "Something went wrong"})
+}
+    
+ } ;
+
+ export const updateUser = async (req, res) => {
+    try {
+      const user = await User.findOne({ _id: req.params.id });
+      if (!user) {
+        return res.status(404).send({ error: 'user not found' });
+      }
+      const query = {
+        _id: req.params.id,
+      };
+      const userObj = {
+        $set: {
+          ...req.body,
+        },
+      };
+      const updatedUser = await User.findOneAndUpdate(query, userObj, {
+        new: true,
+      });
+  
+      return res
+        .status(201)
+        .send({ message: 'updated was successfully', updatedUser });
+    } catch (error) {
+      return res.status(500).send({ error: 'something went wrong' });
+    }
+  };
+  
+  export const getOneUser =   async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id).select('-password');
+      if (user) {
+        res.status(200).send(user);
+      } else {
+        res.status(404).send({ message: 'User Not Found' });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.message })
+    }
+  }
+  
+
+  export const getAllUsers = async(req, res)=> {
+      try{
+const users =await User.find({});
+res.staus(200).send('Users fetched Successfully', users)
+      }catch (error) {
+      res.status(500).json({ message: error.message })
+    }
+  }
