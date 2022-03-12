@@ -14,7 +14,7 @@ export const generateToken = (user) => {
       activated: user.activated
     }, process.env.JWT_SECRET,
     {
-      expiresIn: '2d'
+      expiresIn: '30d'
     }
     )
   }
