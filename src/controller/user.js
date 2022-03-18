@@ -6,7 +6,7 @@ import { sendVerificationEmail } from "../utils/sendMail";
 import { generateToken, isAuth, isAdmin } from "../utils/verifyToken";
 
  export const register = async(req, res)=> {
-const { fullName,username, email, phoneNumber, password, postalCode, state, city } = req.body
+const { fullName,username, email, phoneNumber, password, postalCode, state, city, balance } = req.body
 const token = randomToken(16)
     try{
         const oldUser = await User.findOne({email})
@@ -26,10 +26,12 @@ const token = randomToken(16)
             postalCode,
             state,
             city,
-            activationCode:token
+            activationCode:token,
+            balance
 
         })
 const user = await instance.save();
+
 
 if (user.isAdmin === false) {
     sendVerificationEmail(user.email, user.fullName, user.activationCode);
@@ -104,6 +106,7 @@ try {
         activated: user.activated,
         name: user.name,
         token: generateToken(user)
+        
       })
 }
 catch(err) {
@@ -157,7 +160,7 @@ export const deleteUser =async (req, res)=> {
         .status(201)
         .send({ message: 'updated was successfully', updatedUser });
     } catch (error) {
-      return res.status(500).send({ error: 'something went wrong' });
+      return res.status(500).json({ error: 'something went wrong' });
     }
   };
   
@@ -165,9 +168,9 @@ export const deleteUser =async (req, res)=> {
     try {
       const user = await User.findById(req.params.id).select('-password');
       if (user) {
-        res.status(200).send(user);
+        res.status(200).json(user);
       } else {
-        res.status(404).send({ message: 'User Not Found' });
+        res.status(404).json({ message: 'User Not Found' });
       }
     } catch (error) {
       res.status(500).json({ message: error.message })
@@ -178,7 +181,7 @@ export const deleteUser =async (req, res)=> {
   export const getAllUsers = async(req, res)=> {
       try{
 const users =await User.find({});
-res.staus(200).send('Users fetched Successfully', users)
+res.staus(200).json('Users fetched Successfully', users)
       }catch (error) {
       res.status(500).json({ message: error.message })
     }
