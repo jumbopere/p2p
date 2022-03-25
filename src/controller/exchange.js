@@ -67,7 +67,7 @@ const exchanges = await Exchange.find({
     user: user._id
 })
 if(exchanges.length <= 0){
-    return res.status(409).json({message: "No Exchange Yet!!!"})
+    return res.status(400).json({message: "No Exchange Yet!!!"})
 }
 return res.status(200).json({message: " Exchange fetched succesfully ", exchanges})
     }catch (err){
@@ -81,7 +81,7 @@ export const getAllExchanges= async(req,res)=> {
     try {
 const exchange = await Exchange.find({})
 if(exchange.length <= 0){
-    return res.status(409).json({message: "Exchange list empty"})
+    return res.status(404).json({message: "Exchange list empty"})
 }
 return res.status(200).json("Exchange fetched successfully", exchange)
     }
