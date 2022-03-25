@@ -27,7 +27,8 @@
         "mongoose": "^5.9.28",
         "nodemailer": "^6.7.2",
         "prettier": "^2.5.1",
-        "random-token": "^0.0.8"
+        "random-token": "^0.0.8",
+        "uuid": "^8.3.2"
     },
     "keywords": [],
     "author": "",

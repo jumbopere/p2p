@@ -12,6 +12,10 @@ const userSchema = new Schema({
         lowercase: true,
         unique: true
     },
+    balance: {
+        type: Number,
+    default: 0
+},
     email: {
         type: String,
         required: true,
@@ -49,7 +53,7 @@ required: true
 isAdmin: {
     type: Boolean,
     default: false
-}
+},
 }, {timestamps: true})
 
 const User =  model("User", userSchema)

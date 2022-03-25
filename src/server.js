@@ -4,7 +4,7 @@ import cors from "cors"
 
 import db from "./config/db";
 import config from "./config";
-import { userRoute } from "./routes";
+import { userRoute, exchangeRoute } from "./routes";
 
 
 const app = express()
@@ -20,6 +20,7 @@ db(config)
 .then(()=> {
 
     app.use('/user', userRoute(express));
+    app.use('/exchange', exchangeRoute(express))
     app.listen(PORT, (err) => {
         if (err) {
           throw new Error(err.message);
