@@ -6,12 +6,6 @@ const userSchema = new Schema({
         required: true,
         lowercase: true
     },
-    username: {
-        type: String,
-        required: true,
-        lowercase: true,
-        unique: true
-    },
     email: {
         type: String,
         required: true,
@@ -27,11 +21,17 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
-    postalCode:{
+    gender: {
         type: String,
         required: true
     },
+
+
     city: {
+type: String,
+required: true
+    },
+    address: {
 type: String,
 required: true
     },

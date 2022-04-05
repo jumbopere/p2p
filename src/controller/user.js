@@ -6,7 +6,7 @@ import { sendVerificationEmail } from "../utils/sendMail";
 import { generateToken, isAuth, isAdmin } from "../utils/verifyToken";
 
  export const register = async(req, res)=> {
-const { fullName,username, email, phoneNumber, password, postalCode, state, city } = req.body
+const { firstName ,lastName,  email, phoneNumber, password, state, city, address,gender } = req.body
 const token = randomToken(16)
     try{
         const oldUser = await User.findOne({email})
@@ -18,15 +18,15 @@ const token = randomToken(16)
         }
 
         const instance = new User({
-            fullName,
-            username,
+            fullName: `${firstName} ${lastName}`,
             email,
             password: CryptoJS.AES.encrypt(password, process.env.PASS_SECRET).toString(),
             phoneNumber,
-            postalCode,
             state,
             city,
-            activationCode:token
+            address,
+            activationCode:token,
+            gender
 
         })
 const user = await instance.save();
