@@ -11,20 +11,29 @@ dotenv.config();
  * @returns {*} Email notification
  */
 // eslint-disable-next-line import/prefer-default-export
-export const sendVerificationEmail = (email, fullName, activationCode) => {
+export const sendVerificationEmail = async(email, fullName, activationCode) => {
+  try{
+
+  
+  
   const transporter = nodemailer.createTransport({
     // service: 'zoho mail',
-    host: 'smtp.zoho.com',
-    port: 465,
-    secure: true, // true for 465, false for other ports
+     host:  "smtp.mailtrap.io",//'smtp.ethereal.email',
+    port: 2525,
+    secure: false, // true for 465, false for other ports
+    // auth: {
+    //   user: process.env.EMAIL,
+    //   pass: process.env.PASSWORD,
+    // },
     auth: {
-      user: process.env.EMAIL,
-      pass: process.env.PASSWORD,
-    },
+      user: "db1badbe75facc",
+      pass: "798c9f6c48f205"
+
+  }
   });
 
-  const mailOptions = {
-    from: '"jujo" <jujofoods@zoho.com>',
+  const mailOptions =  await transporter.sendMail({
+    from: '"P2P" <jumbopere9@gmail.com>',
     to: email,
     subject: 'ACCOUNT VERIFICATION CODE',
     html: `
@@ -51,7 +60,7 @@ export const sendVerificationEmail = (email, fullName, activationCode) => {
               margin:0; 
               font-size:30px;
               font-family:'Kurale', serif;">
-              Rezerve Homes</h4>
+              P2P</h4>
         </div>
         <div style="padding:10px 20px;line-height:1.5em;color:#686f7a">
           <p 
@@ -75,9 +84,9 @@ export const sendVerificationEmail = (email, fullName, activationCode) => {
               margin-top:20px;
               color:#686f7a">
               Best regards, <br>
-              Rezerve Homes.<br>
-            <a href="rezervehome.com"
-              style="color: #6c4af2">rezervehome.com
+              P2P.<br>
+            <a href="p2p.com"
+              style="color: #6c4af2">p2p.com
             </a>
           </p>
         </div>
@@ -85,13 +94,11 @@ export const sendVerificationEmail = (email, fullName, activationCode) => {
     </div>
   </body>
     `,
-  };
-
-  // eslint-disable-next-line consistent-return
-  transporter.sendMail(mailOptions, (error) => {
-    if (error) {
-      console.log(error);
-      return error;
-    }
   });
+  console.log("Message sent: %s", mailOptions.messageId);
+}
+catch(error){
+  console.log(error)
+  
+}
 };

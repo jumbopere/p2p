@@ -3,38 +3,45 @@ import jwt from "jsonwebtoken";
 import CryptoJS from 'crypto-js';
 import randomToken from "random-token"
 import { sendVerificationEmail } from "../utils/sendMail";
-import { generateToken, isAuth, isAdmin } from "../utils/verifyToken";
+import {  isAuth, isAdmin } from "../utils/verifyToken";
+import { registerValidator } from "../utils/validate";
+
 
  export const register = async(req, res)=> {
 const { firstName ,lastName,  email, phoneNumber, password, state, city, address,gender } = req.body
-const token = randomToken(16)
+const { errors, isValid } = registerValidator(req.body);
+const activationToken = randomToken(16)
     try{
+      if (!isValid) {
+        return res.status(400).json(errors);
+      }
         const oldUser = await User.findOne({email})
         if(oldUser){
-            return res.status(409).json(" User Already exists")
+            return res.status(409).send({error: " User Already exists"})
         }
         if(password.length < 8){
-            return res.status(400).json("Password must be 8 or characters")
+            return res.status(400).send({error:"Password must be 8 or characters"})
         }
 
         const instance = new User({
-            fullName: `${firstName} ${lastName}`,
+           firstName,
+           lastName,
             email,
             password: CryptoJS.AES.encrypt(password, process.env.PASS_SECRET).toString(),
             phoneNumber,
             state,
             city,
             address,
-            activationCode:token,
+            activationCode:activationToken,
             gender
 
         })
 const user = await instance.save();
 
-if (user.isAdmin === false) {
-    sendVerificationEmail(user.email, user.fullName, user.activationCode);
-  }
-  return res.status(200).json({
+// if (user.isAdmin === false) {
+//     sendVerificationEmail(user.email, user.fullName, user.activationCode);
+//   }
+  return res.status(201).json({
     message: 'User was created successfully',
     user,
   });
@@ -64,10 +71,11 @@ export const userActivate = async(req, res)=> {
     const activatedUser = await User.findOneAndUpdate(activationCode, query, {
         new: true
     })
+    const token = jwt.sign({ email: activatedUser.email, _id: activatedUser._id }, process.env.SECRET, { expiresIn: "30d"})
 return res.status(200).json({
     message: 'Token was verified successfully',
     activatedUser,
-    token: generateToken(activatedUser)
+    token
 
 })
     }catch(err) {
@@ -94,16 +102,10 @@ try {
         });
       }
      
-
+      const token = jwt.sign({ email: oldUser.email, _id: oldUser._id }, process.env.SECRET, { expiresIn: "30d"})
       res.status(200).json({
-        _id: user._id,
-        fullName: user.fullName,
-       username: user.username,
-        email: user.email,
-        isAdmin: user.isAdmin,
-        activated: user.activated,
-        name: user.name,
-        token: generateToken(user)
+       user,
+       token
       })
 }
 catch(err) {
@@ -124,7 +126,7 @@ export const deleteUser =async (req, res)=> {
       const deleteUser = await user.remove();
       res.send({ message: 'User Deleted', user: deleteUser });
     } else {
-      res.status(404).send({ message: 'User Not Found' });
+      res.status(404).send({ error: 'User Not Found' });
     }
 
  }
@@ -167,10 +169,10 @@ export const deleteUser =async (req, res)=> {
       if (user) {
         res.status(200).send(user);
       } else {
-        res.status(404).send({ message: 'User Not Found' });
+        res.status(404).send({ error: 'User Not Found' });
       }
     } catch (error) {
-      res.status(500).json({ message: error.message })
+      res.status(500).json({ error: "something went wrong" })
     }
   }
   
@@ -180,6 +182,6 @@ export const deleteUser =async (req, res)=> {
 const users =await User.find({});
 res.staus(200).send('Users fetched Successfully', users)
       }catch (error) {
-      res.status(500).json({ message: error.message })
+      res.status(500).send({ error: "something went wrong" })
     }
   }
