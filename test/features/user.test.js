@@ -2,81 +2,75 @@ import { describe, it, expect, afterAll } from 'vitest';
 import supertest from 'supertest';
 import app from '../../src/server';
 import fakerUser from '../authHelper';
+import User from '../../src/models/User';
 
-const request = supertest.agent('http://localhost:4000');
+const request = supertest(app);
 
 describe('user controllers test', () => {
-    it("should get all users", async () => {
-        const { body } = await request.get("/user/admin/users").expect(404);
-    
-        expect(body.message).to.equal("you are trying to access an unknown route");
-      });
-  describe('Registering a new user', () => {
-    it('returns 201 response on successful user registration', () => {
-      request
-        .post('/user/register')
-        .send(fakerUser.user)
-        .expect(200)
-        .end((err, res) => {
-          expect(res.statusCode).toBe(201);
-        });
-    });
-    it('returns (409 error) for duplicate email', (done) => {
-        request
-          .post('/v1/user/register')
-          .send(fakerUser.user)
-          .end((err, res) => {
-            expect(res.body.status).to.equal(409);
-            done();
-          });
-      });
+    describe('registering a new user', )
+
+  it('should get all users', async () => {
+    const { body } = await request.get('/user/admin/users').expect(200);
+
+    expect(body.message).to.equal('Users fetched Successfully');
   });
   
-  describe('Login a user', () => {
-    it('returns 200 with complete parameters', () => {
-      request
-        .post('user/login')
-        .send(fakerUser.user)
-        .end((err, res) => {
-          if (err) return (err);
-          expect(res.status).to.equal(200);
-          done();
-        });
+
+  describe('deleting a user', () => {
+    it('it should successfully delete a user', async () => {
+      const { _id } = await new User(fakerUser.user).save();
+
+      const { body } = await request.delete(`/user/${_id}`).expect(200);
+      expect(body.message).to.equal('User Deleted');
     });
-    it('returns 401 if password is not given', (done) => {
-      request
-        .post('/user/login')
-        .send(fakerUser.wrongUser3)
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res.status).to.equal(401);
-          done();
-        });
+    it('should return 404 for no user  found to deleted ', async () => {
+      const id = '41224d776a326fb40f000001';
+      const { body } = await request.delete(`/user/${id}`).expect(404);
+      expect(body.error).to.equal('User Not Found');
     });
-    it('returns 401 error if email is not given', () => {
-      request
-        .post('/user/login')
-        .send(fakerUser.wrongUser2)
-        .end((err, res) => {
-          if (err) return (err);
-          expect(res.status).to.equal(401);
-          done();
-        });
+    it("shouldn't delete admin", async () => {
+      const { _id } = await new User(fakerUser.user2).save();
+      const { body } = await request.delete(`/user/${_id}`).expect(400);
+      expect(body.message).to.equal('Can Not Delete Admin User');
     });
-    it('returns (400 error) for invalid email format', (done) => {
-      request
-        .post('/user/login')
-        .send({
-          email: 'test',
-          username: 'testusername3',
-          password: 'testpassword',
-          phone: '07069473974'
-        })
-        .end((err, res) => {
-          if (err) return (err);
-          expect(res.status).to.equal(400);
-          done();
-        });
+  });
+  describe('getting a user', () => {
+    it('return 200 for getting a user', async () => {
+      const { _id } = await new User(fakerUser.user).save();
+      const { body } = await request.get(`/user/${_id}`).expect(200);
+      expect(body.email).to.equal(fakerUser.user.email);
     });
+    it('return 400 for getting a user', async () => {
+      const id = '41224d776a326fb40f000001';
+      const { body } = await request.get(`/user/${id}`).expect(404);
+      expect(body.error).to.equal('User Not Found');
+    });
+  });
+  describe('activating a user', () => {
+    // it('should activate a user', async () => {
+    //   const { activationCode } =  new User(fakerUser.user3).save();
+    //   const { body } = await request
+    //     .patch('/user/activate')
+    //     .send(activationCode)
+    //     .expect(200);
+    //     expect(body.error).to.equal('User already activated')
+    //  ;
+    // });
+    it('should return 404 for invalid activation token', async () => {
+      const activationCode = '1234as5errtv';
+      const { body } = await request
+        .patch('/user/activate')
+        .send(activationCode)
+        .expect(404);
+      expect(body.error).to.equal('activate code is invalid');
+    });
+    // it('should return 400 for already activated user', async () => {
+    //     const activationCode  = 'testing';
+    //   const { body } = await request
+    //     .patch('/user/activate')
+    //     .send(activationCode)
+    //     .expect(404);
+    //   expect(body.error).to.equal('User already activated');
+    // });
   });
 });

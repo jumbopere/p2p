@@ -50,8 +50,9 @@ export const registerValidator = (data) => {
   if (!Validator.isLowercase(data.email)) {
     errors.email = 'Email must be in lowercase';
   }
-
-
+  if(!Validator.isStrongPassword(data.password)){
+    errors.password = "Password must be at least 8 character  containing at least 1 lowercase, uppercase, symbols  "
+}
 
   return {
     errors,

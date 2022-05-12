@@ -2,7 +2,8 @@ import app from "../../src/server.js";
 import supertest from "supertest";
 import { describe, expect, it, } from "vitest";
 
-const request = supertest(app);
+//const request = supertest(app);
+ const request = supertest(app)
 
 describe("Get home api", ()=> {
     it("should return a 200 success status and a welcome message", async () => {
