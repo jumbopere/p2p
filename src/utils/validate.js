@@ -38,24 +38,45 @@ export const registerValidator = (data) => {
     errors.phoneNumber = 'Phone is required';
   }
   if (Validator.isEmpty(data.address)) {
-    errors.address = 'Phone Number  is required';
+    errors.address = 'Address is required';
   }
 
   if (!Validator.isEmail(data.email)) {
     errors.email = 'Email is invalid';
   }
   if (!Validator.isMobilePhone(data.phoneNumber)) {
-    errors.email = 'Phone Number is invalid';
+    errors.phoneNumber = 'Phone Number is invalid';
   }
   if (!Validator.isLowercase(data.email)) {
     errors.email = 'Email must be in lowercase';
   }
   if(!Validator.isStrongPassword(data.password)){
-    errors.password = "Password must be at least 8 character  containing at least 1 lowercase, uppercase, symbols  "
+    errors.password = "Password must be at least 8 character  containing at least 1 lowercase, number, uppercase, symbols"
 }
+
+return {
+  errors,
+  isValid: isEmpty(errors),
+};
+};
+export const loginValidator= (data)=>{
+  let errors= {}
+  data.email = !isEmpty(data.email) ? data.email : '';
+  data.password = !isEmpty(data.password) ? data.password : '';
+
+  if (Validator.isEmpty(data.email)) {
+    errors.email = 'Email is required';
+  }
+  if (Validator.isEmpty(data.password)) {
+    errors.password = 'Password is required';
+  }
+  if (!Validator.isEmail(data.email)) {
+    errors.email = 'Email is invalid';
+  }
+
 
   return {
     errors,
     isValid: isEmpty(errors),
   };
-};
+}

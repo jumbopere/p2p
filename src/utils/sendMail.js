@@ -11,32 +11,38 @@ dotenv.config();
  * @returns {*} Email notification
  */
 // eslint-disable-next-line import/prefer-default-export
-export const sendVerificationEmail = async(email, fullName, activationCode) => {
-  try{
+export const sendVerificationEmail = async (
+  email,
+  fullName,
+  activationCode
+) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      // service: 'zoho mail',
+      //  host:  "smtp.mailtrap.io",//'smtp.ethereal.email',
+      // port: 2525,
 
-  
-  
-  const transporter = nodemailer.createTransport({
-    // service: 'zoho mail',
-     host:  "smtp.mailtrap.io",//'smtp.ethereal.email',
-    port: 2525,
-    secure: false, // true for 465, false for other ports
-    // auth: {
-    //   user: process.env.EMAIL,
-    //   pass: process.env.PASSWORD,
-    // },
-    auth: {
-      user: "db1badbe75facc",
-      pass: "798c9f6c48f205"
+      // auth: {
+      //   user: process.env.EMAIL,
+      //   pass: process.env.PASSWORD,
+      // },
+      //   auth: {
+      //     user: "db1badbe75facc",
+      //     pass: "798c9f6c48f205"
 
-  }
-  });
+      // }
+      service: "Gmail",
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASS
+      },
+    });
 
-  const mailOptions =  await transporter.sendMail({
-    from: '"P2P" <jumbopere9@gmail.com>',
-    to: email,
-    subject: 'ACCOUNT VERIFICATION CODE',
-    html: `
+    const mailOptions = await transporter.sendMail({
+      from: process.env.EMAIL,
+      to: email,
+      subject: 'ACCOUNT VERIFICATION CODE',
+      html: `
     <body>
     <div>
     <div style="background-color:#f2f3f5;padding:20px">
@@ -94,11 +100,9 @@ export const sendVerificationEmail = async(email, fullName, activationCode) => {
     </div>
   </body>
     `,
-  });
-  console.log("Message sent: %s", mailOptions.messageId);
-}
-catch(error){
-  console.log(error)
-  
-}
+    });
+    console.log('Message sent: %s', mailOptions.messageId);
+  } catch (error) {
+    console.log(error);
+  }
 };

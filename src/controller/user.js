@@ -4,7 +4,7 @@ import CryptoJS from 'crypto-js';
 import randomToken from 'random-token';
 import { sendVerificationEmail } from '../utils/sendMail';
 import { isAuth, isAdmin } from '../utils/verifyToken';
-import { registerValidator } from '../utils/validate';
+import { registerValidator, loginValidator } from '../utils/validate';
 
 export const register = async (req, res) => {
   const {
@@ -47,9 +47,10 @@ export const register = async (req, res) => {
     });
     const user = await instance.save();
 
-    // if (user.isAdmin === false) {
-    //     sendVerificationEmail(user.email, user.fullName, user.activationCode);
-    //   }
+    if (user.isAdmin === false) {
+       await sendVerificationEmail(user.email, user.fullName, user.activationCode);
+
+      }
     return res.status(201).json({
       message: 'User was created successfully',
       user,
@@ -99,10 +100,14 @@ export const userActivate = async (req, res) => {
 
 export const login = async (req, res) => {
   const { email, password } = req.body;
+  const { errors, isValid } = loginValidator(req.body);
   try {
+    if (!isValid) {
+      return res.status(400).json(errors);
+    }
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).send({ error: 'Failed to authenticate user' });
+      return res.status(401).send({ error: 'User not found' });
     }
 
     const hashedPassword = CryptoJS.AES.decrypt(
@@ -110,7 +115,7 @@ export const login = async (req, res) => {
       process.env.PASS_SECRET
     ).toString(CryptoJS.enc.Utf8);
     hashedPassword !== password &&
-      res.status(401).send({ error: 'Failed to authenticate user' });
+      res.status(401).send({ error: 'Incorrect Password' });
 
     if (!user.activated) {
       return res.status(401).send({
